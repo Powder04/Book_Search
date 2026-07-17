@@ -1,0 +1,98 @@
+# HPA cho Gateway (scale theo CPU)
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: gateway-hpa
+  namespace: book-search
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: book-search-gateway
+  minReplicas: 2
+  maxReplicas: 3
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 60
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 120
+    scaleUp:
+      stabilizationWindowSeconds: 0
+
+---
+# Secret chứa RabbitMQ connection cho KEDA
+apiVersion: v1
+kind: Secret
+metadata:
+  name: rabbitmq-keda-secret
+  namespace: book-search
+type: Opaque
+stringData:
+  host: "amqp://guest:guest@rabbitmq.book-search.svc.cluster.local:5672/"
+
+---
+# TriggerAuthentication dùng chung cho 4 ScaledObject
+apiVersion: keda.sh/v1alpha1
+kind: TriggerAuthentication
+metadata:
+  name: rabbitmq-trigger-auth
+  namespace: book-search
+spec:
+  secretTargetRef:
+  - parameter: host
+    name: rabbitmq-keda-secret
+    key: host
+
+---
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: scaler-worker
+  namespace: book-search
+spec:
+  scaleTargetRef:
+    name: book-search-worker    
+  minReplicaCount: 1
+  maxReplicaCount: 4
+  cooldownPeriod: 120
+  advanced:
+    horizontalPodAutoscalerConfig:
+      behavior:
+        scaleDown:
+          stabilizationWindowSeconds: 120
+        scaleUp:
+          stabilizationWindowSeconds: 0
+  triggers:
+  - type: rabbitmq
+    metadata:
+      queueName: voer.queue
+      mode: QueueLength
+      value: "5"
+    authenticationRef:
+      name: rabbitmq-trigger-auth
+  - type: rabbitmq
+    metadata:
+      queueName: openlibrary.queue
+      mode: QueueLength
+      value: "5"
+    authenticationRef:
+      name: rabbitmq-trigger-auth
+  - type: rabbitmq
+    metadata:
+      queueName: projectgutenberg.queue
+      mode: QueueLength
+      value: "5"
+    authenticationRef:
+      name: rabbitmq-trigger-auth
+  - type: rabbitmq
+    metadata:
+      queueName: standardebooks.queue
+      mode: QueueLength
+      value: "5"
+    authenticationRef:
+      name: rabbitmq-trigger-auth

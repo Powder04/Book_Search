@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CTU Search Book</title>
+    <link rel="stylesheet" href="/css/main.css" />
+    <link rel="icon" href="/images/CTU_logo.png">
+  </head>
+  <body>
+    <header>
+      <h1>
+        <span>CTU Search</span>
+        <div class="loader hidden" id="loader">
+              <div class="bar1"></div>
+              <div class="bar2"></div>
+              <div class="bar3"></div>
+              <div class="bar4"></div>
+              <div class="bar5"></div>
+              <div class="bar6"></div>
+              <div class="bar7"></div>
+              <div class="bar8"></div>
+              <div class="bar9"></div>
+              <div class="bar10"></div>
+              <div class="bar11"></div>
+              <div class="bar12"></div>
+          </div>
+      </h1>
+    </header>
+
+    <div class="group">
+      <div class="search-box">
+        <svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
+            <g>
+            <path
+                d="M21.53 20.47l-3.66-3.66C19.195 15.24 20 13.214 20 11c0-4.97-4.03-9-9-9s-9 4.03-9 9 4.03 9 9 9c2.215 0 4.24-.804 5.808-2.13l3.66 3.66c.147.146.34.22.53.22s.385-.073.53-.22c.295-.293.295-.767.002-1.06zM3.5 11c0-4.135 3.365-7.5 7.5-7.5s7.5 3.365 7.5 7.5-3.365 7.5-7.5 7.5-7.5-3.365-7.5-7.5z"
+            ></path>
+            </g>
+        </svg>
+        <input placeholder="Nhập tên sách muốn tìm kiếm ..." type="search" class="input" id="keyword" />
+      </div>
+      <!-- From Uiverse.io by Na3ar-17 -->
+      <div class="radio-input">
+        <label class="label">
+          <input type="radio" id="value-1" checked="" name="value-radio" value="value-1"/>
+          <p class="text">Cơ bản</p>
+        </label>
+        <label class="label">
+          <input type="radio" id="value-2" name="value-radio" value="value-2" />
+          <p class="text">Nâng cao</p>
+        </label>
+      </div>
+    </div>
+    <div class="sections-container">
+      <details class="section">
+        <summary id="sum-open">Open Library (0)</summary>
+        <ul id="openlibrary"></ul>
+        <div id="pagination-open" class="pagination"></div>
+      </details>
+      <details class="section">
+        <summary id="sum-standard">Standard EBooks (0)</summary>
+        <ul id="standardebooks"></ul>
+        <div id="pagination-standard" class="pagination"></div>
+      </details>
+      <details class="section">
+        <summary id="sum-project">Project Gutenberg (0)</summary>
+        <ul id="projectgutenberg"></ul>
+        <div id="pagination-project" class="pagination"></div>
+      </details>
+    </div>
+    <div class="sections-container">
+      <details class="section">
+        <summary id="sum-voer">VOER (0)</summary>
+        <ul id="voer"></ul>
+        <div id="pagination-voer" class="pagination"></div>
+      </details>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+    <script src="/javascript/main.js"></script>
+  </body>
+</html>

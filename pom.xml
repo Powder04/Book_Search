@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/3.3.5 https://maven.apache.org/xsd/maven-3.3.5.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>com.example</groupId>
+    <artifactId>book-search-parent</artifactId>
+    <version>1.0.0</version>
+	<name>Book_Search</name>
+    <packaging>pom</packaging>
+
+    <modules>
+        <module>book-search-common</module>
+        <module>book-search-gateway</module>
+        <module>book-search-worker</module>
+    </modules>
+
+	<parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>4.0.2</version>
+        <relativePath/>
+    </parent>
+	
+	<properties>
+        <java.version>21</java.version>
+		<!-- <lombok.version>1.18.32</lombok.version> -->
+    </properties>
+
+	<dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.example</groupId>
+                <artifactId>book-search-common</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+</project>

@@ -1,0 +1,52 @@
+# ══════════════════════════════════════════════════════════════════
+# Template này được nginx image chính thức tự động chạy qua envsubst
+# khi container khởi động (cơ chế /etc/nginx/templates/*.template ->
+# /etc/nginx/conf.d/*.conf), chỉ thay các biến ${GATEWAY_HOST} và
+# ${GATEWAY_PORT} — các biến nginx khác như $host, $remote_addr,
+# $http_upgrade KHÔNG bị đụng vào vì chúng không phải là env var của
+# container.
+#
+# Frontend gọi API bằng đường dẫn tương đối (xem docker/nginx/static/
+# javascript/main.js): fetch("/search") và new SockJS("/ws") — nên
+# nginx cần proxy đúng 2 path này sang book-search-gateway:8080.
+# ══════════════════════════════════════════════════════════════════
+server {
+    listen 80;
+    server_name _;
+
+    root /usr/share/nginx/html;
+    index index.html;
+
+    # Static assets
+    location /css/        { access_log off; }
+    location /images/     { access_log off; }
+    location /javascript/ { access_log off; }
+
+    # SPA entrypoint
+    location = / {
+        try_files /index.html =404;
+    }
+
+    # REST API — SearchController.searchBook() (POST /search)
+    location /search {
+        proxy_pass http://${GATEWAY_HOST}:${GATEWAY_PORT}/search;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # WebSocket / SockJS — WebSocketConfig.registerStompEndpoints("/ws")
+    location /ws {
+        proxy_pass http://${GATEWAY_HOST}:${GATEWAY_PORT}/ws;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        # SockJS long-polling / WS cần timeout dài hơn mặc định
+        proxy_read_timeout 3600s;
+        proxy_send_timeout 3600s;
+    }
+}
