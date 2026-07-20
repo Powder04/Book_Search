@@ -1,15 +1,3 @@
-# ══════════════════════════════════════════════════════════════════
-# Template này được nginx image chính thức tự động chạy qua envsubst
-# khi container khởi động (cơ chế /etc/nginx/templates/*.template ->
-# /etc/nginx/conf.d/*.conf), chỉ thay các biến ${GATEWAY_HOST} và
-# ${GATEWAY_PORT} — các biến nginx khác như $host, $remote_addr,
-# $http_upgrade KHÔNG bị đụng vào vì chúng không phải là env var của
-# container.
-#
-# Frontend gọi API bằng đường dẫn tương đối (xem docker/nginx/static/
-# javascript/main.js): fetch("/search") và new SockJS("/ws") — nên
-# nginx cần proxy đúng 2 path này sang book-search-gateway:8080.
-# ══════════════════════════════════════════════════════════════════
 server {
     listen 80;
     server_name _;
