@@ -8,21 +8,25 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import com.example.Book_Search.config.RabbitMQProperties;
 import com.example.Book_Search.model.*;
 import lombok.AllArgsConstructor;
+import java.util.concurrent.Executor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @AllArgsConstructor
 public abstract class BaseWorker {
     protected final RabbitTemplate rabbitTemplate;
     protected final RabbitMQProperties rabbitmqProperties;
+    protected final Executor searchTaskExecutor;
 
-    protected void executeWithTimeout(SearchRequest request, OpenResource resource, Runnable searchLogic) {
+    protected void executeWithTimeout(OpenResource resource, Runnable searchLogic) {
         try {
             CompletableFuture
-            .runAsync(searchLogic) // Chay tren thread rieng
-            .get(20, TimeUnit.SECONDS); // Timeout 20s toan bo Worker
+                .runAsync(searchLogic, searchTaskExecutor)
+                .get(20, TimeUnit.SECONDS);
         } catch (TimeoutException e) {
-            System.out.println("Timeout sau 20s, bo qua.");
+            log.warn("[{}] Timeout sau 20s, bo qua.", resource.getSourceName());
         } catch (Exception e) {
-            System.out.println(e);
+            log.error("[{}] Loi khi tim kiem: {}", resource.getSourceName(), e.getMessage(), e);
         }
     }
 

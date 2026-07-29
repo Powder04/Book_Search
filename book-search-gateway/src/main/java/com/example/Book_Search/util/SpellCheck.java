@@ -30,19 +30,13 @@ public class SpellCheck {
 
             msg.put("role", "user");
             msg.put("content",
-                "You are a spelling correction tool.\n" +
-                "Detect the language of the keyword and correct spelling accordingly.\n" +
-                "- If Vietnamese: return proper Vietnamese with full diacritics.\n" +
-                "- If English: return correct English spelling.\n" +
-                "- If mixed: correct both parts appropriately.\n" +
-                "Fix ALL spelling mistakes.\n" +
-                "Return ONLY the corrected keyword.\n\n" +
-
-                "Examples:\n" +
-                "mangj may tinh -> mạng máy tính\n" +
-                "smatphone gaming -> smartphone gaming\n" +
-                "dien thoai smatphone -> điện thoại smartphone\n\n" +
-
+                "Bạn là một chuyên gia biên tập ngôn ngữ cao cấp (expert proofreader) thành thạo cả tiếng Việt và tiếng Anh." + 
+                "Nhiệm vụ của bạn là rà soát và sửa toàn bộ lỗi chính tả, lỗi đánh máy, lỗi dấu câu và lỗi ngữ pháp trong từ khóa được gửi đến.\n" +
+                "Yêu cầu cụ thể:\n" +
+                "1. Giữ nguyên hoàn toàn ý nghĩa gốc, văn phong và ngôn ngữ của đoạn văn (nếu là tiếng Việt giữ tiếng Việt, tiếng Anh giữ tiếng Anh).\n" +
+                "2. Sửa lại các từ sao cho hợp lí nhất có thể.\n" +
+                "3. Kết quả đầu ra sẽ chỉ là cả cụm từ sau khi đã sửa lỗi, không thêm ngoặc kép, không thêm ngoặc đơn, không thêm dấu chấm câu hoặc câu dẫn gì cả.\n" +
+                
                 "Keyword: " + keyword);
 
             messages.add(msg);

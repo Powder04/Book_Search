@@ -7,22 +7,30 @@ let currentKeyword = "";
 let translatedKeyword = "";
 
 const PAGE_SIZE = 10;
-let currentPages = {
-    "Open Library": 1,
-    "Standard EBooks": 1,
-    "Project Gutenberg": 1,
-    "VOER": 1
-};
 
-const loading = document.getElementById("loader");
+const SOURCES = [
+    { name: "Open Library",      ul: "openlibrary",      pagination: "pagination-open",     summary: "sum-open" },
+    { name: "Standard EBooks",   ul: "standardebooks",   pagination: "pagination-standard", summary: "sum-standard" },
+    { name: "Project Gutenberg", ul: "projectgutenberg", pagination: "pagination-project",  summary: "sum-project" },
+    { name: "VOER",              ul: "voer",             pagination: "pagination-voer",     summary: "sum-voer" }
+];
+
+const sourceConfigByName = Object.fromEntries(SOURCES.map(s => [s.name, s]));
+
+function initCurrentPages() {
+    return Object.fromEntries(SOURCES.map(s => [s.name, 1]));
+}
+
+function initBooksBySource() {
+    return Object.fromEntries(SOURCES.map(s => [s.name, []]));
+}
+
+let currentPages = initCurrentPages();
 
 // Cac open resource de render theo
-let booksBySource = {
-    "Open Library": [],
-    "Standard EBooks": [],
-    "Project Gutenberg": [],
-    "VOER": []
-};
+let booksBySource = initBooksBySource();
+
+const loading = document.getElementById("loader");
 
 stompClient.connect({}, () => {
     connected = true;
@@ -42,19 +50,8 @@ document.getElementById("keyword").addEventListener("keypress", async (e) => {
             const keyword = e.target.value;
             showLoading();
 
-            booksBySource = {
-                "Open Library": [],
-                "Standard EBooks": [],
-                "Project Gutenberg": [],
-                "VOER": []
-            };
-
-            currentPages = {
-                "Open Library": 1,
-                "Standard EBooks": 1,
-                "Project Gutenberg": 1,
-                "VOER": 1
-            };
+            booksBySource = initBooksBySource();
+            currentPages = initCurrentPages();
 
             clearUI();
 
@@ -72,6 +69,8 @@ document.getElementById("keyword").addEventListener("keypress", async (e) => {
             translatedKeyword = filter.keywordTrans;
 
             console.log("Search ID:", searchId);
+            console.log("Current Keyword:", currentKeyword);
+            console.log("Translated Keyword:", translatedKeyword);
 
             if(subscription) {
                 subscription.unsubscribe();
@@ -103,23 +102,91 @@ document.getElementById("keyword").addEventListener("keypress", async (e) => {
     }
 });
 
+function getLanguageBucket(book) {
+    const lang = (book.language || "").trim().toLowerCase();
+    if (!lang) return "other";
+
+    const viCodes = ["vi", "vie", "vietnamese"];
+    const enCodes = ["en", "eng", "english"];
+
+    if (viCodes.includes(lang)) return "vi";
+    if (enCodes.includes(lang)) return "en";
+    return "other";
+}
+
+function filterByLanguage(books) {
+    const checked = Array.from(document.querySelectorAll('input[name="language"]:checked'))
+        .map(el => el.value);
+
+    if (checked.length === 0) return books; // Khong chon gi -> khong loc
+
+    return books.filter(book => checked.includes(getLanguageBucket(book)));
+}
+
+function parsePublishDate(publishYear) {
+    if (!publishYear) return null;
+    const str = String(publishYear).trim();
+
+    // dd/mm/yyyy - VOER hien theo dinh dang ngay/thang/nam Viet Nam
+    let m = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+    if (m) {
+        const [, d, mo, y] = m;
+        return new Date(Number(y), Number(mo) - 1, Number(d)).getTime();
+    }
+
+    // yyyy-mm-dd (co the kem gio:phut:giay theo sau)
+    m = str.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+    if (m) {
+        const [, y, mo, d] = m;
+        return new Date(Number(y), Number(mo) - 1, Number(d)).getTime();
+    }
+
+    // Chi co nam (vd Open Library tra "2013")
+    if (/^\d{4}$/.test(str)) {
+        return new Date(Number(str), 0, 1).getTime();
+    }
+
+    // Du phong: neu co bat ky nam 4 chu so nao trong chuoi thi lay tam nam do (1/1)
+    m = str.match(/\d{4}/);
+    return m ? new Date(Number(m[0]), 0, 1).getTime() : null;
+}
+
+function sortByPublishDate(books) {
+    const mode = document.querySelector('input[name="value-publish"]:checked')?.value || "newest";
+
+    const withDate = [];
+    const withoutDate = [];
+
+    books.forEach(book => {
+        const ts = parsePublishDate(book.publishYear);
+        if (ts === null) withoutDate.push(book);
+        else withDate.push(book);
+    });
+
+    withDate.sort((a, b) => {
+        const tsA = parsePublishDate(a.publishYear);
+        const tsB = parsePublishDate(b.publishYear);
+        return mode === "oldest" ? tsA - tsB : tsB - tsA;
+    });
+
+    return mode === "oldest" ? [...withoutDate, ...withDate] : [...withDate, ...withoutDate];
+}
+
 function renderSource(source) {
 
-    const ulMap = {
-        "Open Library": "openlibrary",
-        "Standard EBooks": "standardebooks",
-        "Project Gutenberg": "projectgutenberg",
-        "VOER": "voer"
-    };
+    const config = sourceConfigByName[source];
+    if(!config) return;
 
-    const ul = document.getElementById(ulMap[source]);
+    const ul = document.getElementById(config.ul);
     if(!ul) return;
 
     ul.innerHTML = "";
 
-    const mode = document.querySelector('input[name="value-radio"]:checked')?.value || "value-1";
+    const mode = document.querySelector('input[name="value-title"]:checked')?.value || "value-1";
     let books = booksBySource[source] || [];
     if(mode !== "value-1") books = filterAdvanced(books);
+    books = filterByLanguage(books);
+    books = sortByPublishDate(books);
 
     const page = currentPages[source] || 1;
     const start = (page - 1) * PAGE_SIZE;
@@ -134,17 +201,13 @@ function renderSource(source) {
 
 function renderPagination(source, totalItems) {
 
+    const config = sourceConfigByName[source];
+    if(!config) return;
+
     const totalPages = Math.ceil(totalItems / PAGE_SIZE);
     const currentPage = currentPages[source];
 
-    const containerMap = {
-        "Open Library": "pagination-open",
-        "Standard EBooks": "pagination-standard",
-        "Project Gutenberg": "pagination-project",
-        "VOER": "pagination-voer"
-    };
-
-    const container = document.getElementById(containerMap[source]);
+    const container = document.getElementById(config.pagination);
     if(!container) return;
 
     container.innerHTML = "";
@@ -208,14 +271,10 @@ function renderPagination(source, totalItems) {
 
 function displayBook(book) {
 
-    const map = {
-        "Open Library": "openlibrary",
-        "Standard EBooks": "standardebooks",
-        "Project Gutenberg": "projectgutenberg",
-        "VOER": "voer"
-    };
+    const config = sourceConfigByName[book.source];
+    if(!config) return;
 
-    const ul = document.getElementById(map[book.source]);
+    const ul = document.getElementById(config.ul);
     if(!ul) return;
 
     const li = document.createElement("li");
@@ -255,10 +314,10 @@ function normalize(text) {
 }
 
 function clearUI() {
-    document.getElementById("openlibrary").innerHTML = "";
-    document.getElementById("standardebooks").innerHTML = "";
-    document.getElementById("projectgutenberg").innerHTML = "";
-    document.getElementById("voer").innerHTML = "";
+    SOURCES.forEach(s => {
+        const ul = document.getElementById(s.ul);
+        if(ul) ul.innerHTML = "";
+    });
 }
 
 function showLoading() {
@@ -269,24 +328,20 @@ function hiddenLoading() {
 }
 
 function getBooksToShow() {
-    const mode = document.querySelector('input[name="value-radio"]:checked')?.value || "value-1";
+    const mode = document.querySelector('input[name="value-title"]:checked')?.value || "value-1";
     let all = [];
 
     Object.values(booksBySource).forEach(list => {
         all = all.concat(list);
     });
 
-    return mode === "value-1" ? all : filterAdvanced(all);
+    const filtered = mode === "value-1" ? all : filterAdvanced(all);
+    return filterByLanguage(filtered);
 }
 
 function updateSummary() {
     const books = getBooksToShow();
-    const count = {
-        "Open Library": 0,
-        "Standard EBooks": 0,
-        "Project Gutenberg": 0,
-        "VOER": 0
-    };
+    const count = Object.fromEntries(SOURCES.map(s => [s.name, 0]));
 
     books.forEach(book => {
         if(count[book.source] !== undefined) {
@@ -294,15 +349,28 @@ function updateSummary() {
         }
     });
 
-    document.getElementById("sum-open").textContent = `Open Library (${count["Open Library"]})`;
-    document.getElementById("sum-standard").textContent = `Standard EBooks (${count["Standard EBooks"]})`;
-    document.getElementById("sum-project").textContent = `Project Gutenberg (${count["Project Gutenberg"]})`;
-    document.getElementById("sum-voer").textContent = `VOER (${count["VOER"]})`;
+    SOURCES.forEach(s => {
+        const el = document.getElementById(s.summary);
+        if(el) el.textContent = `${s.name} (${count[s.name]})`;
+    });
 }
 
-document.querySelectorAll('input[name="value-radio"]').forEach(radio => {
+document.querySelectorAll('input[name="value-title"]').forEach(radio => {
     radio.addEventListener("change", () => {
         Object.keys(booksBySource).forEach(renderSource);
         updateSummary();
+    });
+});
+
+document.querySelectorAll('input[name="language"]').forEach(checkbox => {
+    checkbox.addEventListener("change", () => {
+        Object.keys(booksBySource).forEach(renderSource);
+        updateSummary();
+    });
+});
+
+document.querySelectorAll('input[name="value-publish"]').forEach(radio => {
+    radio.addEventListener("change", () => {
+        Object.keys(booksBySource).forEach(renderSource);
     });
 });

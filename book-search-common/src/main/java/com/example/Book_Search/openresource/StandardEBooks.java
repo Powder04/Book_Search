@@ -77,7 +77,7 @@ public class StandardEBooks implements OpenResource {
                             title,
                             author,
                             "",
-                            "",
+                            "en",
                             coverUrl,
                             "",
                             bookUrl,

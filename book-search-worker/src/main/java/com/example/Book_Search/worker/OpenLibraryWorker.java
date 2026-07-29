@@ -1,8 +1,10 @@
 package com.example.Book_Search.worker;
 
 import java.util.List;
+import java.util.concurrent.Executor;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import com.example.Book_Search.config.RabbitMQProperties;
 import com.example.Book_Search.model.*;
@@ -14,8 +16,10 @@ import lombok.extern.slf4j.Slf4j;
 public class OpenLibraryWorker extends BaseWorker {
     private final OpenLibrary resource;
 
-    public OpenLibraryWorker(RabbitTemplate rabbitTemplate, RabbitMQProperties properties, OpenLibrary resource) {
-        super(rabbitTemplate, properties);
+    public OpenLibraryWorker(RabbitTemplate rabbitTemplate, RabbitMQProperties properties,
+                              OpenLibrary resource,
+                              @Qualifier("searchTaskExecutor") Executor searchTaskExecutor) {
+        super(rabbitTemplate, properties, searchTaskExecutor);
         this.resource = resource;
     }
 
@@ -23,23 +27,23 @@ public class OpenLibraryWorker extends BaseWorker {
                     concurrency = "#{rabbitMQProperties.source.concurrency}",
                     containerFactory = "workerFactory")
     public void consume(SearchRequest request) {
-        try {
-            String keyword = request.getKeyword();
-            String keywordTrans = request.getKeywordTrans();
+        executeWithTimeout(resource, () -> {
+            try {
+                String keyword = request.getKeyword();
+                String keywordTrans = request.getKeywordTrans();
 
-            List<BookSearch> books = resource.search(keyword);
-            executeWithTimeout(request, resource, () -> {
+                List<BookSearch> books = resource.search(keyword);
                 publishBooks(request, resource, books);
 
                 if (keywordTrans != null && !keywordTrans.isBlank() && !keywordTrans.equalsIgnoreCase(keyword)) {
                     List<BookSearch> booksEN = resource.search(keywordTrans);
                     publishBooks(request, resource, booksEN);
                 }
-            });
-        } catch(Exception e) {
-            log.error(e.getMessage(), e);
-        } finally {
-            publishDone(request, resource);
-        }
+            } catch (Exception e) {
+                log.error(e.getMessage(), e);
+            } finally {
+                publishDone(request, resource);
+            }
+        });
     }
 }
