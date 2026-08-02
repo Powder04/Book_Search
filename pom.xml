@@ -10,7 +10,8 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>book-search-common</module>
+        <module>book-search-core</module>
+        <module>book-search-sources</module>
         <module>book-search-gateway</module>
         <module>book-search-worker</module>
     </modules>
@@ -31,7 +32,12 @@
         <dependencies>
             <dependency>
                 <groupId>com.example</groupId>
-                <artifactId>book-search-common</artifactId>
+                <artifactId>book-search-core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.example</groupId>
+                <artifactId>book-search-sources</artifactId>
                 <version>${project.version}</version>
             </dependency>
         </dependencies>

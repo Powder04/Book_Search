@@ -1,18 +1,21 @@
 package com.example.Book_Search.config;
 
-import com.example.Book_Search.model.OpenResource;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.core.*;
 import org.springframework.context.annotation.*;
-import java.util.List;
 
+/**
+ * Khai bao cac exchange dung chung (direct/topic/fanout) va queue request.
+ * KHONG phu thuoc OpenResource - phan khai bao queue/binding rieng cho tung
+ * nguon du lieu nam o book-search-sources (SourceRabbitMQConfig), vi chi
+ * worker moi can biet chi tiet tung nguon.
+ */
 @Configuration
 @RequiredArgsConstructor
 public class RabbitMQConfig {
     private final RabbitMQProperties properties;
     private final AmqpAdmin rabbitAdmin;
-    private final List<OpenResource> resources;
 
     @Bean
     public DirectExchange directExchange() {
@@ -28,12 +31,13 @@ public class RabbitMQConfig {
     public FanoutExchange fanoutExchange() {
         return new FanoutExchange(properties.getFanoutExchange());
     }
-    
+
     @PostConstruct
     public void init() {
         DirectExchange directExchange = new DirectExchange(properties.getDirectExchange());
         rabbitAdmin.declareExchange(directExchange);
         rabbitAdmin.declareExchange(new FanoutExchange(properties.getFanoutExchange()));
+        rabbitAdmin.declareExchange(new TopicExchange(properties.getTopicExchange()));
 
         Queue requestQueue = new Queue(properties.getRequest().getQueue());
         rabbitAdmin.declareQueue(requestQueue);
@@ -41,18 +45,5 @@ public class RabbitMQConfig {
                 .bind(requestQueue)
                 .to(directExchange)
                 .with(properties.getRequest().getRouting()));
-
-        // Declare TopicExchange + bindings cho worker queues
-        TopicExchange topicExchange = new TopicExchange(properties.getTopicExchange());
-        rabbitAdmin.declareExchange(topicExchange);
-
-        for (OpenResource resource : resources) {
-            Queue queue = new Queue(resource.getQueueName());
-            rabbitAdmin.declareQueue(queue);
-            rabbitAdmin.declareBinding(BindingBuilder
-                    .bind(queue)
-                    .to(topicExchange)
-                    .with(resource.getRoutingKey()));
-        }
     }
 }

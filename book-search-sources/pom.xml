@@ -2,14 +2,20 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/3.3.5 https://maven.apache.org/xsd/maven-3.3.5.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<parent>
+    <parent>
         <groupId>com.example</groupId>
         <artifactId>book-search-parent</artifactId>
         <version>1.0.0</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>book-search-worker</artifactId>
+    <!--
+        Module rieng cho cac nguon du lieu (OpenResource + impl). Chi
+        book-search-worker phu thuoc module nay - book-search-gateway KHONG
+        depend vao day, nen them/sua/xoa 1 nguon se khong lam thay doi jar/image
+        cua gateway.
+    -->
+    <artifactId>book-search-sources</artifactId>
     <packaging>jar</packaging>
 
     <dependencies>
@@ -18,34 +24,14 @@
             <artifactId>book-search-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.example</groupId>
-            <artifactId>book-search-sources</artifactId>
+            <groupId>org.jsoup</groupId>
+            <artifactId>jsoup</artifactId>
+            <version>1.17.2</version>
         </dependency>
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-amqp</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter</artifactId>
-        </dependency>
-            <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <optional>true</optional>
         </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-        </dependency>
     </dependencies>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-            </plugin>
-        </plugins>
-    </build>
 </project>

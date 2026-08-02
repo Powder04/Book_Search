@@ -34,6 +34,7 @@ build/
 
 
 # Environment files
-/book-search-common/src/main/resources/application.properties
+/book-search-core/src/main/resources/application.properties
 /book-search-gateway/src/main/resources/application.properties
+/book-search-sources/src/main/resources/application.properties
 /book-search-worker/src/main/resources/application.properties
