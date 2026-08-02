@@ -7,11 +7,6 @@ import org.springframework.amqp.core.*;
 import org.springframework.context.annotation.Configuration;
 import java.util.List;
 
-/**
- * Tu dong khai bao 1 queue + binding (vao topic exchange) cho MOI OpenResource
- * bean dang co trong context. Chi worker moi phu thuoc module nay, nen gateway
- * khong bi anh huong khi them/bot nguon du lieu.
- */
 @Configuration
 @RequiredArgsConstructor
 public class SourceRabbitMQConfig {

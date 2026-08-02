@@ -9,9 +9,6 @@ COPY book-search-worker/pom.xml book-search-worker/pom.xml
 
 RUN mvn -q -pl book-search-gateway -am dependency:go-offline || true
 
-# Gateway chi phu thuoc book-search-core (khong dung book-search-sources), nen
-# thay doi nguon du lieu (book-search-sources / book-search-worker) khong lam
-# invalidate cache tu day tro xuong -> khong rebuild/push lai anh gateway.
 COPY book-search-core/src book-search-core/src
 COPY book-search-gateway/src book-search-gateway/src
 

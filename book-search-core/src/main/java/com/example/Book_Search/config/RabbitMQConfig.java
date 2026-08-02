@@ -5,12 +5,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.core.*;
 import org.springframework.context.annotation.*;
 
-/**
- * Khai bao cac exchange dung chung (direct/topic/fanout) va queue request.
- * KHONG phu thuoc OpenResource - phan khai bao queue/binding rieng cho tung
- * nguon du lieu nam o book-search-sources (SourceRabbitMQConfig), vi chi
- * worker moi can biet chi tiet tung nguon.
- */
 @Configuration
 @RequiredArgsConstructor
 public class RabbitMQConfig {

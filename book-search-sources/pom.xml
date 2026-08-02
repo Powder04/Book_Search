@@ -8,13 +8,6 @@
         <version>1.0.0</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
-
-    <!--
-        Module rieng cho cac nguon du lieu (OpenResource + impl). Chi
-        book-search-worker phu thuoc module nay - book-search-gateway KHONG
-        depend vao day, nen them/sua/xoa 1 nguon se khong lam thay doi jar/image
-        cua gateway.
-    -->
     <artifactId>book-search-sources</artifactId>
     <packaging>jar</packaging>
 
