@@ -24,8 +24,7 @@ public class VOERWorker extends BaseWorker {
         this.resource = resource;
     }
 
-    @RabbitListener(queues = "voer.queue", 
-                    concurrency = "#{rabbitMQProperties.source.concurrency}",
+    @RabbitListener(queues = "voer.queue",
                     containerFactory = "workerFactory")
     public void consume(SearchRequest request) {
         executeWithTimeout(resource, () -> {

@@ -25,7 +25,6 @@ public class StandardEBooksWorker extends BaseWorker {
     }
 
     @RabbitListener(queues = "standardebooks.queue",
-                    concurrency = "#{rabbitMQProperties.source.concurrency}",
                     containerFactory = "workerFactory")
     public void consume(SearchRequest request) {
         executeWithTimeout(resource, () -> {

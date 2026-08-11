@@ -15,8 +15,7 @@ public class SearchDispatcher {
     private final SourceRegistry registry;
     private final RabbitMQProperties rabbitmqProperties;
 
-    @RabbitListener(queues = "#{rabbitMQProperties.request.queue}", 
-                    concurrency = "#{rabbitMQProperties.request.concurrency}",
+    @RabbitListener(queues = "#{rabbitMQProperties.request.queue}",
                     containerFactory = "dispatcherFactory")
     public void dispatch(SearchRequest request) {
         for(OpenResource resource : registry.getAllSources()) {

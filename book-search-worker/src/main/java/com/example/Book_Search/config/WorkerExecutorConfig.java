@@ -12,7 +12,7 @@ public class WorkerExecutorConfig {
     public Executor searchTaskExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         executor.setCorePoolSize(2);
-        executor.setMaxPoolSize(4);
+        executor.setMaxPoolSize(5);
         executor.setQueueCapacity(50);
         executor.setThreadNamePrefix("search-task-");
         executor.initialize();

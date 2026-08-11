@@ -15,6 +15,9 @@ const SOURCES = [
     { name: "VOER",              ul: "voer",             pagination: "pagination-voer",     summary: "sum-voer" }
 ];
 
+let doneSources = new Set();
+let expectedDoneCount = SOURCES.length;
+
 const sourceConfigByName = Object.fromEntries(SOURCES.map(s => [s.name, s]));
 
 function initCurrentPages() {
@@ -52,6 +55,8 @@ document.getElementById("keyword").addEventListener("keypress", async (e) => {
 
             booksBySource = initBooksBySource();
             currentPages = initCurrentPages();
+            let doneSources = new Set();
+            let expectedDoneCount = SOURCES.length;
 
             clearUI();
 
@@ -80,7 +85,13 @@ document.getElementById("keyword").addEventListener("keypress", async (e) => {
                 const data = JSON.parse(message.body);
 
                 if(data.type === "DONE") {
-                    hiddenLoading();
+                    if (data.source) {
+                        doneSources.add(data.source);
+                    }
+
+                    if (doneSources.size >= expectedDoneCount) {
+                        hiddenLoading();
+                    }
                     return;
                 }
 

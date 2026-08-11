@@ -15,8 +15,7 @@ public class Listener {
     private final SimpMessagingTemplate messagingTemplate;
     private final WebSocketProperties webSocketProperties;
 
-    @RabbitListener(queues = "#{gatewayResultQueue.name}", 
-                    concurrency = "${app.rabbitmq.result.concurrency}",
+    @RabbitListener(queues = "#{gatewayResultQueue.name}",
                     containerFactory = "resultFactory")
     public void consume(SearchResult result) {
         messagingTemplate.convertAndSend(

@@ -4,7 +4,7 @@
 
 ---
 ## Tiếng Việt
-# Niên luận ngành Mạng máy tính và Truyền thông dữ liệu - Hệ thống tìm kiếm sách từ các Open Resource
+# Luận văn tốt nghiệp ngành Mạng máy tính và Truyền thông dữ liệu - NGHIÊN CỨU XÂY DỰNG NỀN TẢNG TÌM KIẾM HỢP NHẤT QUY MÔ LỚN CHO CÁC KHO HỌC LIỆU MỞ
 
 ## Giới thiệu
 - Đây là hệ thống giúp người dùng có thể tìm kiếm sách từ các Open Resource trên Internet.

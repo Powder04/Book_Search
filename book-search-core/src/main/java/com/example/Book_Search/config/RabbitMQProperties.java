@@ -13,24 +13,16 @@ public class RabbitMQProperties {
     private String fanoutExchange;
     private Request request = new Request();
     private Result result = new Result();
-    private Source source = new Source();
 
     @Data
     public static class Request {
         private String queue;
         private String routing;
-        private String concurrency;
     }
 
     @Data
     public static class Result {
         private String queue;
         private String routing;
-        private String concurrency;
-    }
-
-    @Data
-    public static class Source {
-        private String concurrency;
     }
 }

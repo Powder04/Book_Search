@@ -24,8 +24,7 @@ public class ProjectGutenbergWorker extends BaseWorker {
         this.resource = resource;
     }
 
-    @RabbitListener(queues = "projectgutenberg.queue", 
-                    concurrency = "#{rabbitMQProperties.source.concurrency}",
+    @RabbitListener(queues = "projectgutenberg.queue",
                     containerFactory = "workerFactory")
     public void consume(SearchRequest request) {
         executeWithTimeout(resource, () -> {

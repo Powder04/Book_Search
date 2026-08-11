@@ -23,8 +23,7 @@ public class OpenLibraryWorker extends BaseWorker {
         this.resource = resource;
     }
 
-    @RabbitListener(queues = "openlibrary.queue", 
-                    concurrency = "#{rabbitMQProperties.source.concurrency}",
+    @RabbitListener(queues = "openlibrary.queue",
                     containerFactory = "workerFactory")
     public void consume(SearchRequest request) {
         executeWithTimeout(resource, () -> {
