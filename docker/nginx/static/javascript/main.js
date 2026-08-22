@@ -120,9 +120,15 @@ function getLanguageBucket(book) {
 
     const viCodes = ["vi", "vie", "vietnamese"];
     const enCodes = ["en", "eng", "english"];
+    const frCodes = ["fr", "fre", "fra", "french", "français", "francais"];
+    const deCodes = ["de", "ger", "deu", "german", "deutsch"];
+    const jaCodes = ["ja", "jpn", "japanese", "日本語"];
 
     if (viCodes.includes(lang)) return "vi";
     if (enCodes.includes(lang)) return "en";
+    if (frCodes.includes(lang)) return "fr";
+    if (deCodes.includes(lang)) return "de";
+    if (jaCodes.includes(lang)) return "ja";
     return "other";
 }
 
