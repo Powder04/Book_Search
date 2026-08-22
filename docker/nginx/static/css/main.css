@@ -605,3 +605,60 @@ button.active {
   transform: translateY(-2px);
   box-shadow: 0 6px 16px rgba(0,0,0,.2);
 }
+
+.language-select {
+  position: relative;
+  width: 168px;
+}
+
+.language-select .lang-select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  width: 100%;
+  height: 44px;
+  padding: 0 40px 0 14px;
+  border: 1px solid #d0d5dd;
+  border-radius: 10px;
+  background: #fff;
+  color: #344054;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  outline: none;
+  box-sizing: border-box;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.05);
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.language-select .lang-select:hover {
+  border-color: #98a2b3;
+}
+
+.language-select .lang-select:focus {
+  border-color: var(--secondary);
+  box-shadow:
+    0 0 0 3px rgba(124, 58, 237, 0.12),
+    0 1px 2px rgba(16, 24, 40, 0.05);
+}
+
+.language-select::after {
+  content: "";
+
+  position: absolute;
+  top: 50%;
+  right: 15px;
+
+  width: 7px;
+  height: 7px;
+
+  border-right: 1.5px solid #667085;
+  border-bottom: 1.5px solid #667085;
+
+  transform: translateY(-70%) rotate(45deg);
+
+  pointer-events: none;
+}

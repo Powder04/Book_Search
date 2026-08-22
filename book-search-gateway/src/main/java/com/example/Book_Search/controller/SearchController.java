@@ -20,12 +20,12 @@ public class SearchController {
     private final SpellCheck spellCheck;
 
     @PostMapping("/search")
-    public Map<String, String> searchBook(@RequestParam String keyword) {
+    public Map<String, String> searchBook(@RequestParam String keyword, @RequestParam String targetLang) {
         String searchID = UUID.randomUUID().toString();
         System.out.println(searchID);
         String keywordFixed = spellCheck.fixKeyword(keyword);
         // String keyword1 = keyword; 
-        String keywordTrans = translate.translate(keywordFixed);
+        String keywordTrans = translate.translate(keywordFixed, targetLang);
 
         SearchRequest request = new SearchRequest(
                         searchID,

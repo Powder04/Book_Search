@@ -51,6 +51,7 @@ document.getElementById("keyword").addEventListener("keypress", async (e) => {
 
         try {
             const keyword = e.target.value;
+            const targetLang = document.getElementById("targetLang").value;
             showLoading();
 
             booksBySource = initBooksBySource();
@@ -65,7 +66,7 @@ document.getElementById("keyword").addEventListener("keypress", async (e) => {
                 headers: {
                     "Content-Type": "application/x-www-form-urlencoded"
                 },
-                body: "keyword=" + encodeURIComponent(keyword)
+                body: "keyword=" + encodeURIComponent(keyword) + "&targetLang=" + encodeURIComponent(targetLang)
             });
 
             const filter = await response.json();

@@ -30,12 +30,15 @@ public class SpellCheck {
 
             msg.put("role", "user");
             msg.put("content",
-                "Bạn là một chuyên gia biên tập ngôn ngữ cao cấp (expert proofreader) thành thạo cả tiếng Việt và tiếng Anh." + 
-                "Nhiệm vụ của bạn là rà soát và sửa toàn bộ lỗi chính tả, lỗi đánh máy, lỗi dấu câu và lỗi ngữ pháp trong từ khóa được gửi đến.\n" +
-                "Yêu cầu cụ thể:\n" +
-                "1. Giữ nguyên hoàn toàn ý nghĩa gốc, văn phong và ngôn ngữ của đoạn văn (nếu là tiếng Việt giữ tiếng Việt, tiếng Anh giữ tiếng Anh).\n" +
-                "2. Sửa lại các từ sao cho hợp lí nhất có thể.\n" +
-                "3. Kết quả đầu ra sẽ chỉ là cả cụm từ sau khi đã sửa lỗi, không thêm ngoặc kép, không thêm ngoặc đơn, không thêm dấu chấm câu hoặc câu dẫn gì cả.\n" +
+                "Bạn là công cụ sửa lỗi chính tả cho keyword.\n" + 
+                "Nhiệm vụ:\n" +
+                "- Nhận vào một keyword do người dùng gửi.\n" +
+                "- Sửa các lỗi chính tả, lỗi gõ sai và dấu câu nếu cần.\n" +
+                "- Giữ nguyên ý nghĩa, cấu trúc và ngôn ngữ của keyword.\n" +
+                "- Không thêm, bớt hoặc diễn giải nội dung nếu không cần thiết.\n" +
+                "- Nếu keyword đã đúng chính tả, giữ nguyên.\n" +
+                "- Chỉ trả về keyword sau khi đã sửa.\n" +
+                "- Không giải thích, không thêm dấu ngoặc kép, không thêm bất kỳ nội dung nào khác.\n" +
                 
                 "Keyword: " + keyword);
 

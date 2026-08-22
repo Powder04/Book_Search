@@ -1,12 +1,15 @@
 package com.example.Book_Search.config;
 
+import java.util.concurrent.*;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.*;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.client.RestTemplate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +20,20 @@ import tools.jackson.databind.ObjectMapper;
 @RequiredArgsConstructor
 public class GeneralConfig {
     private final GeneralProperties generalProperties;
+
+    @Bean(name = "listenerTaskExecutor")
+    public Executor listenerTaskExecutor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(generalProperties.getResult().getMaxConsume() + 20);
+        executor.setMaxPoolSize(generalProperties.getResult().getMaxConsume() + 20);
+        executor.setQueueCapacity(0);
+        executor.setThreadNamePrefix("listener-task-");
+        executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
+        executor.setWaitForTasksToCompleteOnShutdown(true);
+        executor.setAwaitTerminationSeconds(30);
+        executor.initialize();
+        return executor;
+    }
 
     @Bean
     public SimpleRabbitListenerContainerFactory dispatcherFactory(ConnectionFactory cf) {
@@ -33,7 +50,7 @@ public class GeneralConfig {
     public SimpleRabbitListenerContainerFactory workerFactory(ConnectionFactory cf) {
         var f = new SimpleRabbitListenerContainerFactory();
         f.setConnectionFactory(cf);
-        f.setMessageConverter(messageConverter());
+        f.setMessageConverter(messageConverter()); 
         f.setConcurrentConsumers(generalProperties.getWorker().getConsume());
         f.setMaxConcurrentConsumers(generalProperties.getWorker().getMaxConsume());
         f.setPrefetchCount(generalProperties.getWorker().getPrefetchCount());
@@ -41,11 +58,13 @@ public class GeneralConfig {
     }
 
     @Bean
-    public SimpleRabbitListenerContainerFactory resultFactory(ConnectionFactory cf) {
+    public SimpleRabbitListenerContainerFactory resultFactory(ConnectionFactory cf, 
+        @Qualifier("listenerTaskExecutor") Executor listenerTaskExecutor) {
         var f = new SimpleRabbitListenerContainerFactory();
         f.setConnectionFactory(cf);
         f.setMessageConverter(messageConverter());
-        f.setConcurrentConsumers(generalProperties.getResult().getConsume());
+        f.setTaskExecutor(listenerTaskExecutor);
+        f.setConcurrentConsumers(generalProperties.getResult().getMaxConsume());
         f.setMaxConcurrentConsumers(generalProperties.getResult().getMaxConsume());
         f.setPrefetchCount(generalProperties.getResult().getPrefetchCount());
         return f;

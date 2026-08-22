@@ -24,12 +24,11 @@ public class Translate {
     @Value("${app.api.translate.key}")
     private String apiKey;
 
-    public String translate(String keyword) {
+    public String translate(String keyword, String targetLang) {
 
         Map<String, Object> request = new HashMap<>();
         request.put("text", List.of(keyword));   // DeepL yeu cau text la array
-        request.put("source_lang", "VI"); // Ngon ngu goc
-        request.put("target_lang", "EN"); // Ngon ngu dich
+        request.put("target_lang", targetLang); // Ngon ngu dich
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
