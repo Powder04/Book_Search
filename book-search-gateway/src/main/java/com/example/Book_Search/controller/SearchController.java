@@ -1,14 +1,10 @@
 package com.example.Book_Search.controller;
 
-import java.util.Map;
-import java.util.UUID;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import java.util.*;
+import org.springframework.web.bind.annotation.*;
 import com.example.Book_Search.model.SearchRequest;
 import com.example.Book_Search.service.SearchProducerService;
-import com.example.Book_Search.util.SpellCheck;
-import com.example.Book_Search.util.Translate;
+import com.example.Book_Search.util.*;
 
 import lombok.RequiredArgsConstructor;
 
@@ -24,7 +20,6 @@ public class SearchController {
         String searchID = UUID.randomUUID().toString();
         System.out.println(searchID);
         String keywordFixed = spellCheck.fixKeyword(keyword);
-        // String keyword1 = keyword; 
         String keywordTrans = translate.translate(keywordFixed, targetLang);
 
         SearchRequest request = new SearchRequest(
@@ -38,6 +33,6 @@ public class SearchController {
             "searchId", searchID,
             "keyword", keywordFixed,
             "keywordTrans", keywordTrans
-        ); // Tra ID ve cho C => Lay ID bao danh de nhan kq
+        ); //Tra ID ve cho C => Lay ID bao danh de nhan kq
     }
 }

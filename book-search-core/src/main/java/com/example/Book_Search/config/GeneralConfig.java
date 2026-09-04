@@ -70,7 +70,7 @@ public class GeneralConfig {
         return f;
     }
 
-    // Tao resttemplate, spring boot khong tu tao duoc
+    //Tao resttemplate, spring boot khong tu tao duoc
     @Bean
     public RestTemplate restTemplate() {
         HttpComponentsClientHttpRequestFactory f = new HttpComponentsClientHttpRequestFactory();

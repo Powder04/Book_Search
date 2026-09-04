@@ -10,12 +10,14 @@ import java.util.List;
 @Configuration
 @RequiredArgsConstructor
 public class SourceRabbitMQConfig {
+
     private final RabbitMQProperties properties;
     private final AmqpAdmin rabbitAdmin;
     private final List<OpenResource> resources;
 
     @PostConstruct
     public void init() {
+        
         TopicExchange topicExchange = new TopicExchange(properties.getTopicExchange());
         rabbitAdmin.declareExchange(topicExchange);
 

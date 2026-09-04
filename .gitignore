@@ -38,3 +38,6 @@ build/
 /book-search-gateway/src/main/resources/application.properties
 /book-search-sources/src/main/resources/application.properties
 /book-search-worker/src/main/resources/application.properties
+/docker
+/k8s
+/k8s-config

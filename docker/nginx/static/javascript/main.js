@@ -5,20 +5,14 @@ let subscription = null;
 let connected = false;
 let currentKeyword = "";
 let translatedKeyword = "";
-
 const PAGE_SIZE = 10;
-
-const SOURCES = [
-    { name: "Open Library",      ul: "openlibrary",      pagination: "pagination-open",     summary: "sum-open" },
-    { name: "Standard EBooks",   ul: "standardebooks",   pagination: "pagination-standard", summary: "sum-standard" },
-    { name: "Project Gutenberg", ul: "projectgutenberg", pagination: "pagination-project",  summary: "sum-project" },
-    { name: "VOER",              ul: "voer",             pagination: "pagination-voer",     summary: "sum-voer" }
-];
-
+let SOURCES = [];
+let sourceConfigByName = {};
 let doneSources = new Set();
-let expectedDoneCount = SOURCES.length;
-
-const sourceConfigByName = Object.fromEntries(SOURCES.map(s => [s.name, s]));
+let expectedDoneCount = 0;
+let currentPages = {};
+let booksBySource = {};
+const loading = document.getElementById("loader");
 
 function initCurrentPages() {
     return Object.fromEntries(SOURCES.map(s => [s.name, 1]));
@@ -28,24 +22,67 @@ function initBooksBySource() {
     return Object.fromEntries(SOURCES.map(s => [s.name, []]));
 }
 
-let currentPages = initCurrentPages();
-
-// Cac open resource de render theo
-let booksBySource = initBooksBySource();
-
-const loading = document.getElementById("loader");
-
 stompClient.connect({}, () => {
     connected = true;
     console.log("WebSocket connected");
 });
 
-// Bat event khi User gui keyword
+function renderSections() {
+    const container = document.getElementById("sections-container");
+    container.innerHTML = "";
+
+    SOURCES.forEach(s => {
+        const details = document.createElement("details");
+        details.className = "section";
+
+        const summary = document.createElement("summary");
+        summary.id = s.summary;
+        summary.textContent = `${s.name} (0)`;
+
+        const ul = document.createElement("ul");
+        ul.id = s.ul;
+
+        const pagination = document.createElement("div");
+        pagination.id = s.pagination;
+        pagination.className = "pagination";
+
+        details.appendChild(summary);
+        details.appendChild(ul);
+        details.appendChild(pagination);
+        container.appendChild(details);
+    });
+}
+
+async function loadSources() {
+    const res = await fetch("/sources");
+    const data = await res.json();
+
+    SOURCES = data.map(s => ({
+        name: s.name,
+        ul: s.slug,
+        pagination: "pagination-" + s.slug,
+        summary: "sum-" + s.slug
+    }));
+
+    sourceConfigByName = Object.fromEntries(SOURCES.map(s => [s.name, s]));
+    currentPages = initCurrentPages();
+    booksBySource = initBooksBySource();
+    expectedDoneCount = SOURCES.length;
+
+    renderSections();
+}
+
+//Bat event khi User gui keyword
 document.getElementById("keyword").addEventListener("keypress", async (e) => {
     if(e.key === "Enter") {
 
         if(!connected) {
             alert("WebSocket chưa kết nối");
+            return;
+        }
+
+        if(SOURCES.length === 0) {
+            alert("Chưa tải được danh sách nguồn, vui lòng thử lại.");
             return;
         }
 
@@ -56,8 +93,8 @@ document.getElementById("keyword").addEventListener("keypress", async (e) => {
 
             booksBySource = initBooksBySource();
             currentPages = initCurrentPages();
-            let doneSources = new Set();
-            let expectedDoneCount = SOURCES.length;
+            doneSources = new Set();
+            expectedDoneCount = SOURCES.length;
 
             clearUI();
 
@@ -96,14 +133,12 @@ document.getElementById("keyword").addEventListener("keypress", async (e) => {
                     return;
                 }
 
-                // Push theo source
                 if(!booksBySource[data.source]) {
                     booksBySource[data.source] = [];
                 }
 
                 booksBySource[data.source].push(data);
 
-                // Render tung source
                 renderSource(data.source);
                 updateSummary();
             });
@@ -122,7 +157,7 @@ function getLanguageBucket(book) {
     const enCodes = ["en", "eng", "english"];
     const frCodes = ["fr", "fre", "fra", "french", "français", "francais"];
     const deCodes = ["de", "ger", "deu", "german", "deutsch"];
-    const jaCodes = ["ja", "jpn", "japanese", "日本語"];
+    const jaCodes = ["ja", "jpn", "japanese"];
 
     if (viCodes.includes(lang)) return "vi";
     if (enCodes.includes(lang)) return "en";
@@ -136,7 +171,7 @@ function filterByLanguage(books) {
     const checked = Array.from(document.querySelectorAll('input[name="language"]:checked'))
         .map(el => el.value);
 
-    if (checked.length === 0) return books; // Khong chon gi -> khong loc
+    if (checked.length === 0) return books;
 
     return books.filter(book => checked.includes(getLanguageBucket(book)));
 }
@@ -145,26 +180,22 @@ function parsePublishDate(publishYear) {
     if (!publishYear) return null;
     const str = String(publishYear).trim();
 
-    // dd/mm/yyyy - VOER hien theo dinh dang ngay/thang/nam Viet Nam
     let m = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
     if (m) {
         const [, d, mo, y] = m;
         return new Date(Number(y), Number(mo) - 1, Number(d)).getTime();
     }
 
-    // yyyy-mm-dd (co the kem gio:phut:giay theo sau)
     m = str.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
     if (m) {
         const [, y, mo, d] = m;
         return new Date(Number(y), Number(mo) - 1, Number(d)).getTime();
     }
 
-    // Chi co nam (vd Open Library tra "2013")
     if (/^\d{4}$/.test(str)) {
         return new Date(Number(str), 0, 1).getTime();
     }
 
-    // Du phong: neu co bat ky nam 4 chu so nao trong chuoi thi lay tam nam do (1/1)
     m = str.match(/\d{4}/);
     return m ? new Date(Number(m[0]), 0, 1).getTime() : null;
 }
@@ -373,22 +404,34 @@ function updateSummary() {
     });
 }
 
-document.querySelectorAll('input[name="value-title"]').forEach(radio => {
-    radio.addEventListener("change", () => {
-        Object.keys(booksBySource).forEach(renderSource);
-        updateSummary();
+function attachFilterListeners() {
+    document.querySelectorAll('input[name="value-title"]').forEach(radio => {
+        radio.addEventListener("change", () => {
+            Object.keys(booksBySource).forEach(renderSource);
+            updateSummary();
+        });
     });
-});
 
-document.querySelectorAll('input[name="language"]').forEach(checkbox => {
-    checkbox.addEventListener("change", () => {
-        Object.keys(booksBySource).forEach(renderSource);
-        updateSummary();
+    document.querySelectorAll('input[name="language"]').forEach(checkbox => {
+        checkbox.addEventListener("change", () => {
+            Object.keys(booksBySource).forEach(renderSource);
+            updateSummary();
+        });
     });
-});
 
-document.querySelectorAll('input[name="value-publish"]').forEach(radio => {
-    radio.addEventListener("change", () => {
-        Object.keys(booksBySource).forEach(renderSource);
+    document.querySelectorAll('input[name="value-publish"]').forEach(radio => {
+        radio.addEventListener("change", () => {
+            Object.keys(booksBySource).forEach(renderSource);
+        });
     });
-});
+}
+
+//Nap danh sach nguon
+(async function init() {
+    try {
+        await loadSources();
+        attachFilterListeners();
+    } catch (error) {
+        console.error("Khong tai duoc danh sach nguon (/sources):", error);
+    }
+})();

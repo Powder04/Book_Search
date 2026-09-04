@@ -1,7 +1,9 @@
 FROM nginx:1.27-alpine
 
 ENV GATEWAY_HOST=book-search-gateway \
-    GATEWAY_PORT=8080
+    GATEWAY_PORT=8080 \
+    WORKER_HOST=book-search-worker \
+    WORKER_PORT=8080
 
 COPY default.conf.template /etc/nginx/templates/default.conf.template
 
