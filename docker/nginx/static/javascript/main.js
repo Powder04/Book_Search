@@ -12,6 +12,7 @@ let doneSources = new Set();
 let expectedDoneCount = 0;
 let currentPages = {};
 let booksBySource = {};
+let activeSource = null;
 const loading = document.getElementById("loader");
 
 function initCurrentPages() {
@@ -28,16 +29,27 @@ stompClient.connect({}, () => {
 });
 
 function renderSections() {
-    const container = document.getElementById("sections-container");
-    container.innerHTML = "";
+    const menu = document.getElementById("source-menu");
+    const views = document.getElementById("result-views");
+    menu.innerHTML = "";
+    views.innerHTML = "";
 
     SOURCES.forEach(s => {
-        const details = document.createElement("details");
-        details.className = "section";
+        // Muc nguon trong danh sach ben trai
+        const li = document.createElement("li");
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "source-item";
+        btn.id = s.summary;
+        btn.textContent = `${s.name} (0)`;
+        btn.addEventListener("click", () => openSource(s.name));
+        li.appendChild(btn);
+        menu.appendChild(li);
 
-        const summary = document.createElement("summary");
-        summary.id = s.summary;
-        summary.textContent = `${s.name} (0)`;
+        // Khung ket qua cua nguon (an san, chi hien khi duoc chon)
+        const view = document.createElement("div");
+        view.className = "source-view hidden";
+        view.id = "view-" + s.ul;
 
         const ul = document.createElement("ul");
         ul.id = s.ul;
@@ -46,11 +58,38 @@ function renderSections() {
         pagination.id = s.pagination;
         pagination.className = "pagination";
 
-        details.appendChild(summary);
-        details.appendChild(ul);
-        details.appendChild(pagination);
-        container.appendChild(details);
+        view.appendChild(ul);
+        view.appendChild(pagination);
+        views.appendChild(view);
     });
+
+    closeSource();
+}
+
+function openSource(name) {
+    if (!sourceConfigByName[name]) return;
+    activeSource = name;
+
+    SOURCES.forEach(s => {
+        document.getElementById("view-" + s.ul).classList.toggle("hidden", s.name !== name);
+        document.getElementById(s.summary).classList.toggle("active", s.name === name);
+    });
+
+    document.getElementById("result-title").textContent = name;
+    document.getElementById("result-header").classList.remove("hidden");
+    document.getElementById("result-empty").classList.add("hidden");
+}
+
+function closeSource() {
+    activeSource = null;
+
+    SOURCES.forEach(s => {
+        document.getElementById("view-" + s.ul).classList.add("hidden");
+        document.getElementById(s.summary).classList.remove("active");
+    });
+
+    document.getElementById("result-header").classList.add("hidden");
+    document.getElementById("result-empty").classList.remove("hidden");
 }
 
 async function loadSources() {
@@ -431,6 +470,7 @@ function attachFilterListeners() {
     try {
         await loadSources();
         attachFilterListeners();
+        document.getElementById("close-result").addEventListener("click", closeSource);
     } catch (error) {
         console.error("Khong tai duoc danh sach nguon (/sources):", error);
     }

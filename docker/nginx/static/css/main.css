@@ -662,3 +662,119 @@ button.active {
 
   pointer-events: none;
 }
+
+/* ===== Bo cuc moi: danh sach nguon (trai) + khung ket qua (phai) ===== */
+.workspace {
+  display: grid;
+  grid-template-columns: 260px minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.workspace .hidden {
+  display: none !important;
+}
+
+.source-list {
+  position: sticky;
+  top: 20px;
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+  padding: 14px;
+  background: #ffffff;
+  border-radius: 14px;
+  box-shadow: var(--shadow);
+}
+
+.source-list-title {
+  margin: 0 0 10px;
+  font-size: 16px;
+  color: var(--primary);
+}
+
+.source-menu {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.source-item {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 10px 12px;
+  text-align: left;
+  font: inherit;
+  font-weight: 700;
+  color: var(--secondary);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 10px;
+}
+
+.source-item:hover {
+  background: #eef7fd;
+}
+
+.source-item.active {
+  color: #ffffff;
+  background: var(--primary);
+}
+
+.result-panel {
+  min-width: 0;
+  min-height: 200px;
+}
+
+.result-empty {
+  margin: 0;
+  padding: 24px;
+  text-align: center;
+  color: var(--muted);
+}
+
+.result-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.result-header h2 {
+  margin: 0;
+  font-size: 20px;
+  color: var(--primary);
+}
+
+.result-close {
+  width: 34px;
+  height: 34px;
+  margin: 0;
+  padding: 0;
+  font-size: 16px;
+  line-height: 1;
+  border-radius: 50%;
+}
+
+.source-view ul {
+  margin: 0;
+}
+
+.source-view ul:empty::before {
+  content: "Chưa có tài liệu nào.";
+  display: block;
+  padding: 12px 0;
+  color: var(--muted);
+}
+
+@media (max-width: 768px) {
+  .workspace {
+    grid-template-columns: 1fr;
+  }
+
+  .source-list {
+    position: static;
+    max-height: 240px;
+  }
+}

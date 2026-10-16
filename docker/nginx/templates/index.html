@@ -42,7 +42,20 @@
             <input placeholder="Nhập tên tài liệu muốn tìm kiếm ..." type="search" class="input" id="keyword"/>
           </div>
         </div>
-        <div class="sections-container" id="sections-container"></div>
+        <div class="workspace">
+          <nav class="source-list" aria-label="Danh sách nguồn">
+            <h3 class="source-list-title">Nguồn tài liệu</h3>
+            <ul class="source-menu" id="source-menu"></ul>
+          </nav>
+          <section class="result-panel" aria-live="polite">
+            <p class="result-empty" id="result-empty">Chọn một nguồn ở bên trái để xem tài liệu.</p>
+            <div class="result-header hidden" id="result-header">
+              <h2 id="result-title"></h2>
+              <button type="button" class="result-close" id="close-result" aria-label="Thu gọn" title="Thu gọn">✕</button>
+            </div>
+            <div id="result-views"></div>
+          </section>
+        </div>
       </main>
 
       <aside class="filter-panel">
